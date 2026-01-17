@@ -1,122 +1,234 @@
+import 'dart:async';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:sensors_plus/sensors_plus.dart';
 
 void main() {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]).then((_) {
+    runApp(const LevelApp());
+  });
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class LevelApp extends StatelessWidget {
+  const LevelApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+      title: 'Su Terazisi',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: const Color(0xFF121212),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const LevelPage(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class LevelPage extends StatefulWidget {
+  const LevelPage({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<LevelPage> createState() => _LevelPageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _LevelPageState extends State<LevelPage> {
+  // [ADIM 1 & 4] Performans için ValueNotifier ve Modern API kullanımı
+  final ValueNotifier<Offset> _sensorData = ValueNotifier(Offset.zero);
+  StreamSubscription? _subscription;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+  // [ADIM 2] Yumuşatma (Smoothing) için filtre değişkenleri
+  double _smoothX = 0;
+  double _smoothY = 0;
+  final double _filterFactor = 0.15; // Değer düştükçe hareket daha yumuşak olur
+
+  @override
+  void initState() {
+    super.initState();
+    // [ADIM 4] accelerometerEventStream kullanımı
+    _subscription = accelerometerEventStream().listen((event) {
+      // [ADIM 2] Low-pass filter (Alçak geçiren filtre) uygulaması
+      _smoothX = _smoothX + (event.x - _smoothX) * _filterFactor;
+      _smoothY = _smoothY + (event.y - _smoothY) * _filterFactor;
+
+      _sensorData.value = Offset(_smoothX, _smoothY);
     });
   }
 
   @override
+  void dispose() {
+    _subscription?.cancel();
+    _sensorData.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: const Text("Su Terazisi"),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: .center,
-          children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          // Ekran boyutuna göre dinamik çap belirleme
+          double size = min(constraints.maxWidth, constraints.maxHeight) * 0.8;
+
+          // [ADIM 1] Sadece değişen içeriği dinlemek için builder
+          return ValueListenableBuilder<Offset>(
+            valueListenable: _sensorData,
+            builder: (context, offset, child) {
+              double x = offset.dx;
+              double y = offset.dy;
+
+              // Hassasiyet ve derece hesaplamaları
+              bool isCentered = (x.abs() < 0.5 && y.abs() < 0.5);
+              double xDeg = atan2(x, 9.8) * 180 / pi;
+              double yDeg = atan2(y, 9.8) * 180 / pi;
+
+              // [ADIM 3] Sınır Kontrolü (Clamping)
+              // Baloncuğu daire içinde tutar, dışarı taşmasını engeller
+              double limit = (size / 2) - 20; // 20: baloncuğun yarıçapı payı
+              double posX = (x * 20).clamp(-limit, limit);
+              double posY = (y * 20).clamp(-limit, limit);
+
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "${xDeg.toStringAsFixed(1)}°",
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            // Dış Halkası
+                            Container(
+                              width: size,
+                              height: size,
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: isCentered
+                                      ? Colors.green
+                                      : Colors.white24,
+                                  width: 4,
+                                ),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            // Kılavuz Çizgiler (CustomPainter)
+                            SizedBox(
+                              width: size,
+                              height: size,
+                              child: CustomPaint(
+                                painter: CrossLinesPainter(isCentered),
+                              ),
+                            ),
+                            // Hareketli Baloncuk
+                            Transform.translate(
+                              offset: Offset(posX, posY),
+                              child: Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: isCentered
+                                      ? Colors.green
+                                      : Colors.redAccent,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.3),
+                                      blurRadius: 8,
+                                      offset: const Offset(2, 4),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(width: 20),
+                        Text(
+                          "${yDeg.toStringAsFixed(1)}°",
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 40),
+                    Text(
+                      "X: ${x.toStringAsFixed(2)} | Y: ${y.toStringAsFixed(2)}",
+                      style: const TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      isCentered ? "MÜKEMMEL" : "EĞİM VAR",
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: isCentered ? Colors.green : Colors.redAccent,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
       ),
     );
   }
+}
+
+class CrossLinesPainter extends CustomPainter {
+  final bool isCentered;
+  CrossLinesPainter(this.isCentered);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = isCentered ? Colors.green.withOpacity(0.5) : Colors.white10
+      ..strokeWidth = 2;
+
+    canvas.drawLine(
+      Offset(0, size.height / 2),
+      Offset(size.width, size.height / 2),
+      paint,
+    );
+    canvas.drawLine(
+      Offset(size.width / 2, 0),
+      Offset(size.width / 2, size.height),
+      paint,
+    );
+
+    // [ADIM 5] Temiz ve şık bir orta hedef halkası
+    canvas.drawCircle(
+      Offset(size.width / 2, size.height / 2),
+      15,
+      paint..style = PaintingStyle.stroke,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CrossLinesPainter oldDelegate) =>
+      oldDelegate.isCentered != isCentered;
 }
