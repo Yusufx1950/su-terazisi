@@ -9,6 +9,8 @@
       "dependencies": [
         "cupertino_icons",
         "flutter",
+        "flutter_speed_dial",
+        "get",
         "sensors_plus"
       ],
       "devDependencies": [
@@ -39,6 +41,21 @@
         "stream_channel",
         "test_api",
         "vector_math"
+      ]
+    },
+    {
+      "name": "get",
+      "version": "4.7.3",
+      "dependencies": [
+        "flutter",
+        "web"
+      ]
+    },
+    {
+      "name": "flutter_speed_dial",
+      "version": "7.0.0",
+      "dependencies": [
+        "flutter"
       ]
     },
     {
@@ -155,6 +172,11 @@
         "string_scanner",
         "term_glyph"
       ]
+    },
+    {
+      "name": "web",
+      "version": "1.1.1",
+      "dependencies": []
     },
     {
       "name": "sensors_plus_platform_interface",

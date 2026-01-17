@@ -3,7 +3,12 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:get/get.dart';
 import 'package:sensors_plus/sensors_plus.dart';
+import 'package:su_terazisi/pages/liste_duzen.dart';
+
+import 'controller/getcontroller.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,6 +18,7 @@ void main() {
   ]).then((_) {
     runApp(const LevelApp());
   });
+  Get.put(AngleController());
 }
 
 class LevelApp extends StatelessWidget {
@@ -20,7 +26,7 @@ class LevelApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'Su Terazisi',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark().copyWith(
@@ -72,10 +78,29 @@ class _LevelPageState extends State<LevelPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        child: Icon(Icons.menu),
+      floatingActionButton: SpeedDial(
+        icon: Icons.add,
+        activeIcon: Icons.close,
+        backgroundColor: Colors.green.shade800,
+        children: [
+          SpeedDialChild(
+            child: const Icon(Icons.save),
+            label: 'Kaydet',
+            onTap: () => print("Kaydet tıklandı"),
+          ),
+          SpeedDialChild(
+            child: const Icon(Icons.edit),
+            label: 'Tüm Liste',
+            onTap: () => Get.to(() => Kaydedilenler()),
+          ),
+          SpeedDialChild(
+            child: const Icon(Icons.delete),
+            label: 'Sil',
+            onTap: () => print("Sil tıklandı"),
+          ),
+        ],
       ),
+
       appBar: AppBar(
         title: const Text(
           "PRO SU TERAZİSİ",

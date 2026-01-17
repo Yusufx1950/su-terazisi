@@ -56,6 +56,12 @@
       "languageVersion": "3.8"
     },
     {
+      "name": "flutter_speed_dial",
+      "rootUri": "file:///C:/Users/yusuf/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_speed_dial-7.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "flutter_test",
       "rootUri": "file:///C:/flutter/packages/flutter_test",
       "packageUri": "lib/",
@@ -66,6 +72,12 @@
       "rootUri": "file:///C:/flutter/packages/flutter_web_plugins",
       "packageUri": "lib/",
       "languageVersion": "3.8"
+    },
+    {
+      "name": "get",
+      "rootUri": "file:///C:/Users/yusuf/AppData/Local/Pub/Cache/hosted/pub.dev/get-4.7.3",
+      "packageUri": "lib/",
+      "languageVersion": "2.15"
     },
     {
       "name": "leak_tracker",
@@ -192,6 +204,12 @@
       "rootUri": "file:///C:/Users/yusuf/AppData/Local/Pub/Cache/hosted/pub.dev/vm_service-15.0.2",
       "packageUri": "lib/",
       "languageVersion": "3.5"
+    },
+    {
+      "name": "web",
+      "rootUri": "file:///C:/Users/yusuf/AppData/Local/Pub/Cache/hosted/pub.dev/web-1.1.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
     },
     {
       "name": "su_terazisi",
