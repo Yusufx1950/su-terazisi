@@ -48,8 +48,8 @@ class LevelPage extends StatefulWidget {
 
 class _LevelPageState extends State<LevelPage> {
   final ValueNotifier<Offset> _sensorData = ValueNotifier(Offset.zero);
-  List<Map<String, dynamic>> savedAngles = [];
   StreamSubscription? _subscription;
+  final AngleController angleController = Get.find<AngleController>();
 
   double _smoothX = 0;
   double _smoothY = 0;
@@ -60,12 +60,58 @@ class _LevelPageState extends State<LevelPage> {
     super.initState();
     _subscription = accelerometerEventStream().listen((event) {
       _smoothX = _smoothX + (event.x - _smoothX) * _filterFactor;
-      // [DÜZELTME] Y eksenini tersine çevirerek baloncuğun fiziksel doğruluğunu sağlıyoruz.
-      // Fiziksel bir su terazisinde baloncuk her zaman en yüksek noktaya gider.
       double correctedY = -event.y;
       _smoothY = _smoothY + (correctedY - _smoothY) * _filterFactor;
       _sensorData.value = Offset(_smoothX, _smoothY);
     });
+  }
+
+  void _showSaveDialog(double x, double y) {
+    final TextEditingController noteController = TextEditingController();
+
+    // Derece hesaplamaları
+    double xDeg = atan2(x, 9.8) * 180 / pi;
+    double yDeg = atan2(y, 9.8) * 180 / pi;
+
+    Get.defaultDialog(
+      title: "Açıyı Kaydet",
+      backgroundColor: const Color(0xFF1E293B),
+      titleStyle: const TextStyle(color: Colors.white),
+      content: Column(
+        children: [
+          Text(
+            "X: ${xDeg.toStringAsFixed(1)}° | Y: ${yDeg.toStringAsFixed(1)}°",
+            style: const TextStyle(
+              color: Colors.greenAccent,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 15),
+          TextField(
+            controller: noteController,
+            decoration: const InputDecoration(
+              labelText: "Not Ekle (Opsiyonel)",
+              labelStyle: TextStyle(color: Colors.white70),
+              border: OutlineInputBorder(),
+            ),
+          ),
+        ],
+      ),
+      textConfirm: "KAYDET",
+      textCancel: "İPTAL",
+      confirmTextColor: Colors.white,
+      onConfirm: () {
+        angleController.addAngle(xDeg, yDeg, note: noteController.text);
+        Get.back();
+        Get.snackbar(
+          "Başarılı",
+          "Açı kaydedildi.",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green.withOpacity(0.7),
+          colorText: Colors.white,
+        );
+      },
+    );
   }
 
   @override
@@ -86,7 +132,10 @@ class _LevelPageState extends State<LevelPage> {
           SpeedDialChild(
             child: const Icon(Icons.save),
             label: 'Kaydet',
-            onTap: () => print("Kaydet tıklandı"),
+            onTap: () {
+              final offset = _sensorData.value;
+              _showSaveDialog(offset.dx, offset.dy);
+            },
           ),
           SpeedDialChild(
             child: const Icon(Icons.edit),
@@ -96,11 +145,21 @@ class _LevelPageState extends State<LevelPage> {
           SpeedDialChild(
             child: const Icon(Icons.delete),
             label: 'Sil',
-            onTap: () => print("Sil tıklandı"),
+            onTap: () {
+              if (angleController.savedAngles.isNotEmpty) {
+                angleController.deleteAngle(
+                  angleController.savedAngles.length - 1,
+                );
+                Get.snackbar(
+                  "Silindi",
+                  "Son kayıt silindi.",
+                  snackPosition: SnackPosition.BOTTOM,
+                );
+              }
+            },
           ),
         ],
       ),
-
       appBar: AppBar(
         title: const Text(
           "PRO SU TERAZİSİ",
@@ -129,12 +188,10 @@ class _LevelPageState extends State<LevelPage> {
               double xDeg = atan2(x, 9.8) * 180 / pi;
               double yDeg = atan2(y, 9.8) * 180 / pi;
 
-              // Ana daire sınırları
               double mainLimit = (mainLevelSize / 2) - 22;
               double mainPosX = (x * 20).clamp(-mainLimit, mainLimit);
               double mainPosY = (y * 20).clamp(-mainLimit, mainLimit);
 
-              // Tüp sınırları
               double tubeLimit = (mainLevelSize / 2) - 35;
               double tubePosX = (x * 15).clamp(-tubeLimit, tubeLimit);
               double tubePosY = (y * 15).clamp(-tubeLimit, tubeLimit);
@@ -143,7 +200,6 @@ class _LevelPageState extends State<LevelPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // --- YATAY TÜP (X Derecesi İçin) ---
                     _buildVial(
                       width: mainLevelSize,
                       height: tubeThickness,
@@ -153,13 +209,10 @@ class _LevelPageState extends State<LevelPage> {
                       isCentered: isXCentered,
                       isHorizontal: true,
                     ),
-
                     const SizedBox(height: 40),
-
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // --- ANA MERKEZİ DAİRE ---
                         Stack(
                           alignment: Alignment.center,
                           children: [
@@ -190,10 +243,7 @@ class _LevelPageState extends State<LevelPage> {
                             ),
                           ],
                         ),
-
                         const SizedBox(width: 30),
-
-                        // --- DİKEY TÜP (Y Derecesi İçin) ---
                         _buildVial(
                           width: tubeThickness,
                           height: mainLevelSize,
@@ -205,9 +255,7 @@ class _LevelPageState extends State<LevelPage> {
                         ),
                       ],
                     ),
-
                     const SizedBox(height: 50),
-
                     Text(
                       isAllCentered ? "MÜKEMMEL HİZALAMA" : "DÜZLEMİ AYARLAYIN",
                       style: TextStyle(
@@ -227,7 +275,6 @@ class _LevelPageState extends State<LevelPage> {
     );
   }
 
-  // Su Terazisi Tüpü (Vial) Tasarımı
   Widget _buildVial({
     required double width,
     required double height,
@@ -250,12 +297,9 @@ class _LevelPageState extends State<LevelPage> {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Orta işaret çizgisi
           isHorizontal
               ? Container(width: 2, height: height, color: Colors.white10)
               : Container(width: width, height: 2, color: Colors.white10),
-
-          // Hareket eden derece baloncuğu
           Transform.translate(
             offset: Offset(posX, posY),
             child: Container(
@@ -299,7 +343,6 @@ class _LevelPageState extends State<LevelPage> {
     );
   }
 
-  // Ana Seviye İçin Basit Baloncuk
   Widget _buildSimpleBubble(double size, bool isCentered) {
     return Container(
       width: size,
@@ -333,7 +376,6 @@ class CrossLinesPainter extends CustomPainter {
     final paint = Paint()
       ..color = isCentered ? Colors.green.withOpacity(0.3) : Colors.white10
       ..strokeWidth = 1.5;
-
     canvas.drawLine(
       Offset(0, size.height / 2),
       Offset(size.width, size.height / 2),
@@ -344,7 +386,6 @@ class CrossLinesPainter extends CustomPainter {
       Offset(size.width / 2, size.height),
       paint,
     );
-
     canvas.drawCircle(
       Offset(size.width / 2, size.height / 2),
       20,
