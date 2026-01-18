@@ -106,7 +106,7 @@ class _LevelPageState extends State<LevelPage> {
         Get.snackbar(
           "Başarılı",
           "Açı kaydedildi.",
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.green.withOpacity(0.7),
           colorText: Colors.white,
         );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../controller/getcontroller.dart';
 
@@ -11,12 +12,25 @@ class Kaydedilenler extends StatefulWidget {
 }
 
 class _KaydedilenlerState extends State<Kaydedilenler> {
+  void shareAngle(Map<String, dynamic> angle) {
+    final text =
+        "xDeg: ${angle['xDeg']}, yDeg: ${angle['yDeg']}, note: ${angle['note']}";
+    Share.share(text);
+  }
+
   @override
   Widget build(BuildContext context) {
     final AngleController angleController = Get.find();
 
     return Scaffold(
       appBar: AppBar(title: const Text("Su Terazisi")),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {},
+        child: IconButton(
+          icon: Icon(Icons.share),
+          onPressed: () => angleController.shareAllAngles(),
+        ),
+      ),
       body: Obx(() {
         if (angleController.savedAngles.isEmpty) {
           // Liste boşsa ortada mesaj göster
