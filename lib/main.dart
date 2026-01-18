@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:get/get.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:sensors_plus/sensors_plus.dart';
+import 'package:su_terazisi/components/banner.dart';
 import 'package:su_terazisi/pages/liste_duzen.dart';
 
 import 'controller/getcontroller.dart';
@@ -14,6 +16,8 @@ import 'controller/translations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  MobileAds.instance.initialize();
 
   // Controller'ları başlat
   Get.put(ThemeController());
@@ -360,6 +364,8 @@ class _LevelPageState extends State<LevelPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    BannerAdWidget(),
+                    SizedBox(height: 12),
                     _buildVial(
                       width: mainLevelSize,
                       height: tubeThickness,
