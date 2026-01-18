@@ -328,7 +328,7 @@ class _LevelPageState extends State<LevelPage> {
               child: RotatedBox(
                 quarterTurns: isHorizontal ? 0 : 1,
                 child: Text(
-                  "${degree.abs().toStringAsFixed(1)}°",
+                  "${(degree.abs() * 2).toStringAsFixed(1)}°",
                   style: const TextStyle(
                     color: Colors.black,
                     fontWeight: FontWeight.w900,
