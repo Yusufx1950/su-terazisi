@@ -23,29 +23,24 @@ class _KaydedilenlerState extends State<Kaydedilenler> {
     final AngleController angleController = Get.find();
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Su Terazisi")),
+      appBar: AppBar(title: const Text("Kaydedilen Ölçümler")),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        child: IconButton(
-          icon: Icon(Icons.share),
-          onPressed: () => angleController.shareAllAngles(),
-        ),
+        onPressed: () => angleController.shareAllAngles(),
+        child: const Icon(Icons.share),
       ),
       body: Obx(() {
         if (angleController.savedAngles.isEmpty) {
-          // Liste boşsa ortada mesaj göster
-          return const Center(
+          return Center(
             child: Text(
               "Henüz ölçüm kaydedilmedi",
               style: TextStyle(
                 fontSize: 18,
-                color: Colors.white,
+                color: context.textTheme.bodyMedium?.color?.withOpacity(0.5),
                 fontWeight: FontWeight.bold,
               ),
             ),
           );
         } else {
-          // Liste doluysa render et
           return ListView.builder(
             itemCount: angleController.savedAngles.length,
             itemBuilder: (context, index) {
@@ -61,6 +56,7 @@ class _KaydedilenlerState extends State<Kaydedilenler> {
                   title: Text(
                     "X: ${angle["xDeg"].toStringAsFixed(1)}°, "
                     "Y: ${angle["yDeg"].toStringAsFixed(1)}°",
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   subtitle: TextField(
                     controller: noteController,
@@ -74,6 +70,10 @@ class _KaydedilenlerState extends State<Kaydedilenler> {
                     onChanged: (value) {
                       angleController.editAngle(index, note: value);
                     },
+                  ),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.redAccent),
+                    onPressed: () => angleController.deleteAngle(index),
                   ),
                 ),
               );
