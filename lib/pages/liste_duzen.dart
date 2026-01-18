@@ -16,7 +16,7 @@ class _KaydedilenlerState extends State<Kaydedilenler> {
     final AngleController angleController = Get.find();
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Kaydedilen Ölçümler")),
+      appBar: AppBar(title: Text('saved_measurements'.tr)),
       floatingActionButton: FloatingActionButton(
         onPressed: () => angleController.shareAllAngles(),
         child: const Icon(Icons.share),
@@ -25,7 +25,7 @@ class _KaydedilenlerState extends State<Kaydedilenler> {
         if (angleController.savedAngles.isEmpty) {
           return Center(
             child: Text(
-              "Henüz ölçüm kaydedilmedi",
+              'no_measurements'.tr,
               style: TextStyle(
                 fontSize: 18,
                 color: context.textTheme.bodyMedium?.color?.withValues(
@@ -40,7 +40,6 @@ class _KaydedilenlerState extends State<Kaydedilenler> {
             itemCount: angleController.savedAngles.length,
             itemBuilder: (context, index) {
               final angle = angleController.savedAngles[index];
-              // Her satırı benzersiz bir key ile sarmalıyoruz
               return AngleListItem(
                 key: ValueKey(index),
                 angle: angle,
@@ -99,12 +98,11 @@ class _AngleListItemState extends State<AngleListItem> {
         ),
         subtitle: TextField(
           controller: _noteController,
-          decoration: const InputDecoration(
-            hintText: "Not giriniz",
+          decoration: InputDecoration(
+            hintText: 'enter_note'.tr,
             border: InputBorder.none,
           ),
           onChanged: (value) {
-            // Sadece veriyi güncelliyoruz, widget zaten kendi controller'ını yönetiyor
             widget.controller.editAngle(widget.index, note: value);
           },
         ),

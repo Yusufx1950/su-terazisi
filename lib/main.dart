@@ -10,6 +10,7 @@ import 'package:su_terazisi/pages/liste_duzen.dart';
 
 import 'controller/getcontroller.dart';
 import 'controller/theme_controller.dart';
+import 'controller/translations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,6 +37,9 @@ class LevelApp extends StatelessWidget {
     return Obx(
       () => GetMaterialApp(
         title: 'Su Terazisi',
+        translations: MyTranslations(),
+        locale: Get.deviceLocale,
+        fallbackLocale: const Locale('tr', 'TR'),
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           useMaterial3: true,
@@ -115,7 +119,7 @@ class _LevelPageState extends State<LevelPage> {
     double yDeg = baseYDeg * 2;
 
     Get.defaultDialog(
-      title: "Açıyı Kaydet",
+      title: 'save_angle'.tr,
       backgroundColor: themeController.isDarkMode
           ? const Color(0xFF1E293B)
           : Colors.white,
@@ -138,7 +142,7 @@ class _LevelPageState extends State<LevelPage> {
               color: themeController.isDarkMode ? Colors.white : Colors.black,
             ),
             decoration: InputDecoration(
-              labelText: "Not Ekle (Opsiyonel)",
+              labelText: 'note_hint'.tr,
               labelStyle: TextStyle(
                 color: themeController.isDarkMode
                     ? Colors.white70
@@ -149,15 +153,15 @@ class _LevelPageState extends State<LevelPage> {
           ),
         ],
       ),
-      textConfirm: "KAYDET",
-      textCancel: "İPTAL",
+      textConfirm: 'save'.tr,
+      textCancel: 'cancel'.tr,
       confirmTextColor: Colors.white,
       onConfirm: () {
         angleController.addAngle(xDeg, yDeg, note: noteController.text);
-        Get.back();
+        runInAction(() => Get.back());
         Get.snackbar(
-          "Başarılı",
-          "Açı kaydedildi.",
+          'success'.tr,
+          'angle_saved'.tr,
           snackPosition: SnackPosition.TOP,
           backgroundColor: themeController.primaryColor.value.withValues(
             alpha: 0.7,
@@ -167,6 +171,9 @@ class _LevelPageState extends State<LevelPage> {
       },
     );
   }
+
+  // Action helper for GetX dialog
+  void runInAction(void Function() action) => action();
 
   @override
   void dispose() {
@@ -187,17 +194,17 @@ class _LevelPageState extends State<LevelPage> {
                 decoration: BoxDecoration(
                   color: themeController.primaryColor.value,
                 ),
-                child: const Text(
-                  "Ayarlar",
-                  style: TextStyle(color: Colors.white, fontSize: 24),
+                child: Text(
+                  'settings'.tr,
+                  style: const TextStyle(color: Colors.white, fontSize: 24),
                 ),
               ),
             ),
-            const Padding(
-              padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
               child: Text(
-                "Tema Modu",
-                style: TextStyle(fontWeight: FontWeight.bold),
+                'theme_mode'.tr,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
             Obx(
@@ -208,28 +215,45 @@ class _LevelPageState extends State<LevelPage> {
                     groupValue: themeController.themeModeIndex.value,
                     onChanged: (v) => themeController.changeThemeMode(v!),
                   ),
-                  const Text("Sistem"),
+                  Text('system'.tr),
                   Radio<int>(
                     value: 1,
                     groupValue: themeController.themeModeIndex.value,
                     onChanged: (v) => themeController.changeThemeMode(v!),
                   ),
-                  const Text("Aydınlık"),
+                  Text('light'.tr),
                   Radio<int>(
                     value: 2,
                     groupValue: themeController.themeModeIndex.value,
                     onChanged: (v) => themeController.changeThemeMode(v!),
                   ),
-                  const Text("Karanlık"),
+                  Text('dark'.tr),
                 ],
               ),
             ),
             const Divider(),
-            const Padding(
-              padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
               child: Text(
-                "Vurgu Rengi",
-                style: TextStyle(fontWeight: FontWeight.bold),
+                'language'.tr,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+            _buildLanguageTile("Türkçe", const Locale('tr', 'TR')),
+            _buildLanguageTile("English", const Locale('en', 'US')),
+            _buildLanguageTile("中文 (Chinese)", const Locale('zh', 'CN')),
+            _buildLanguageTile("हिन्दी (Hindi)", const Locale('hi', 'IN')),
+            _buildLanguageTile("Español", const Locale('es', 'ES')),
+            _buildLanguageTile("Français", const Locale('fr', 'FR')),
+            _buildLanguageTile("العربية (Arabic)", const Locale('ar', 'SA')),
+            _buildLanguageTile("বাংলা (Bengali)", const Locale('bn', 'BD')),
+            _buildLanguageTile("Português", const Locale('pt', 'PT')),
+            const Divider(),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              child: Text(
+                'accent_color'.tr,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
             Padding(
@@ -257,6 +281,7 @@ class _LevelPageState extends State<LevelPage> {
                 ),
               ),
             ),
+            const SizedBox(height: 30),
           ],
         ),
       ),
@@ -268,7 +293,7 @@ class _LevelPageState extends State<LevelPage> {
           children: [
             SpeedDialChild(
               child: const Icon(Icons.save),
-              label: 'Kaydet',
+              label: 'fab_save'.tr,
               onTap: () {
                 final offset = _sensorData.value;
                 _showSaveDialog(offset.dx, offset.dy);
@@ -276,20 +301,20 @@ class _LevelPageState extends State<LevelPage> {
             ),
             SpeedDialChild(
               child: const Icon(Icons.edit),
-              label: 'Tüm Liste',
+              label: 'fab_list'.tr,
               onTap: () => Get.to(() => const Kaydedilenler()),
             ),
             SpeedDialChild(
               child: const Icon(Icons.delete),
-              label: 'Listeyi Sil',
+              label: 'fab_delete'.tr,
               onTap: () {
                 if (angleController.savedAngles.isNotEmpty) {
                   angleController.deleteAngle(
                     angleController.savedAngles.length - 1,
                   );
                   Get.snackbar(
-                    "Silindi",
-                    "Son kayıt silindi.",
+                    'deleted'.tr,
+                    'last_record_deleted'.tr,
                     snackPosition: SnackPosition.TOP,
                   );
                 }
@@ -299,9 +324,9 @@ class _LevelPageState extends State<LevelPage> {
         ),
       ),
       appBar: AppBar(
-        title: const Text(
-          "PRO SU TERAZİSİ",
-          style: TextStyle(letterSpacing: 2, fontSize: 14),
+        title: Text(
+          'app_title'.tr,
+          style: const TextStyle(letterSpacing: 2, fontSize: 14),
         ),
       ),
       body: LayoutBuilder(
@@ -405,8 +430,8 @@ class _LevelPageState extends State<LevelPage> {
                     Obx(
                       () => Text(
                         isAllCentered
-                            ? "MÜKEMMEL HİZALAMA"
-                            : "DÜZLEMİ AYARLAYIN",
+                            ? 'perfect_alignment'.tr
+                            : 'adjust_plane'.tr,
                         style: TextStyle(
                           color: isAllCentered
                               ? themeController.primaryColor.value
@@ -426,6 +451,26 @@ class _LevelPageState extends State<LevelPage> {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildLanguageTile(String label, Locale locale) {
+    bool isSelected =
+        Get.locale?.languageCode == locale.languageCode &&
+        (locale.countryCode == null ||
+            Get.locale?.countryCode == locale.countryCode);
+
+    return ListTile(
+      dense: true,
+      leading: const Icon(Icons.language, size: 20),
+      title: Text(label),
+      trailing: isSelected
+          ? const Icon(Icons.check, color: Colors.green, size: 18)
+          : null,
+      onTap: () {
+        Get.updateLocale(locale);
+        Get.back();
+      },
     );
   }
 

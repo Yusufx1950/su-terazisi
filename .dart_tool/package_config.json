@@ -122,6 +122,12 @@
       "languageVersion": "3.3"
     },
     {
+      "name": "google_mobile_ads",
+      "rootUri": "file:///C:/Users/yusuf/AppData/Local/Pub/Cache/hosted/pub.dev/google_mobile_ads-7.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.9"
+    },
+    {
       "name": "hooks",
       "rootUri": "file:///C:/Users/yusuf/AppData/Local/Pub/Cache/hosted/pub.dev/hooks-0.20.5",
       "packageUri": "lib/",
@@ -414,6 +420,30 @@
       "rootUri": "file:///C:/Users/yusuf/AppData/Local/Pub/Cache/hosted/pub.dev/web-1.1.1",
       "packageUri": "lib/",
       "languageVersion": "3.4"
+    },
+    {
+      "name": "webview_flutter",
+      "rootUri": "file:///C:/Users/yusuf/AppData/Local/Pub/Cache/hosted/pub.dev/webview_flutter-4.13.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.8"
+    },
+    {
+      "name": "webview_flutter_android",
+      "rootUri": "file:///C:/Users/yusuf/AppData/Local/Pub/Cache/hosted/pub.dev/webview_flutter_android-4.10.11",
+      "packageUri": "lib/",
+      "languageVersion": "3.9"
+    },
+    {
+      "name": "webview_flutter_platform_interface",
+      "rootUri": "file:///C:/Users/yusuf/AppData/Local/Pub/Cache/hosted/pub.dev/webview_flutter_platform_interface-2.14.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.6"
+    },
+    {
+      "name": "webview_flutter_wkwebview",
+      "rootUri": "file:///C:/Users/yusuf/AppData/Local/Pub/Cache/hosted/pub.dev/webview_flutter_wkwebview-3.23.5",
+      "packageUri": "lib/",
+      "languageVersion": "3.9"
     },
     {
       "name": "win32",
