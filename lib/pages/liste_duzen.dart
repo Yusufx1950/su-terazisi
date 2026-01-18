@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:share_plus/share_plus.dart';
 
 import '../controller/getcontroller.dart';
 
@@ -12,12 +11,6 @@ class Kaydedilenler extends StatefulWidget {
 }
 
 class _KaydedilenlerState extends State<Kaydedilenler> {
-  void shareAngle(Map<String, dynamic> angle) {
-    final text =
-        "xDeg: ${angle['xDeg']}, yDeg: ${angle['yDeg']}, note: ${angle['note']}";
-    Share.share(text);
-  }
-
   @override
   Widget build(BuildContext context) {
     final AngleController angleController = Get.find();
@@ -35,7 +28,9 @@ class _KaydedilenlerState extends State<Kaydedilenler> {
               "Henüz ölçüm kaydedilmedi",
               style: TextStyle(
                 fontSize: 18,
-                color: context.textTheme.bodyMedium?.color?.withOpacity(0.5),
+                color: context.textTheme.bodyMedium?.color?.withValues(
+                  alpha: 0.5,
+                ),
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -45,42 +40,79 @@ class _KaydedilenlerState extends State<Kaydedilenler> {
             itemCount: angleController.savedAngles.length,
             itemBuilder: (context, index) {
               final angle = angleController.savedAngles[index];
-              final noteController = TextEditingController(
-                text: angle["note"] ?? "",
-              );
-
-              return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                child: ListTile(
-                  leading: const Icon(Icons.save, color: Colors.green),
-                  title: Text(
-                    "X: ${angle["xDeg"].toStringAsFixed(1)}°, "
-                    "Y: ${angle["yDeg"].toStringAsFixed(1)}°",
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: TextField(
-                    controller: noteController,
-                    decoration: const InputDecoration(
-                      hintText: "Not giriniz",
-                      border: InputBorder.none,
-                    ),
-                    onSubmitted: (value) {
-                      angleController.editAngle(index, note: value);
-                    },
-                    onChanged: (value) {
-                      angleController.editAngle(index, note: value);
-                    },
-                  ),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.redAccent),
-                    onPressed: () => angleController.deleteAngle(index),
-                  ),
-                ),
+              // Her satırı benzersiz bir key ile sarmalıyoruz
+              return AngleListItem(
+                key: ValueKey(index),
+                angle: angle,
+                index: index,
+                controller: angleController,
               );
             },
           );
         }
       }),
+    );
+  }
+}
+
+class AngleListItem extends StatefulWidget {
+  final Map<String, dynamic> angle;
+  final int index;
+  final AngleController controller;
+
+  const AngleListItem({
+    super.key,
+    required this.angle,
+    required this.index,
+    required this.controller,
+  });
+
+  @override
+  State<AngleListItem> createState() => _AngleListItemState();
+}
+
+class _AngleListItemState extends State<AngleListItem> {
+  late TextEditingController _noteController;
+
+  @override
+  void initState() {
+    super.initState();
+    _noteController = TextEditingController(text: widget.angle["note"] ?? "");
+  }
+
+  @override
+  void dispose() {
+    _noteController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      child: ListTile(
+        leading: const Icon(Icons.save, color: Colors.green),
+        title: Text(
+          "X: ${widget.angle["xDeg"].toStringAsFixed(1)}°, "
+          "Y: ${widget.angle["yDeg"].toStringAsFixed(1)}°",
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        subtitle: TextField(
+          controller: _noteController,
+          decoration: const InputDecoration(
+            hintText: "Not giriniz",
+            border: InputBorder.none,
+          ),
+          onChanged: (value) {
+            // Sadece veriyi güncelliyoruz, widget zaten kendi controller'ını yönetiyor
+            widget.controller.editAngle(widget.index, note: value);
+          },
+        ),
+        trailing: IconButton(
+          icon: const Icon(Icons.delete, color: Colors.redAccent),
+          onPressed: () => widget.controller.deleteAngle(widget.index),
+        ),
+      ),
     );
   }
 }

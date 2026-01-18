@@ -14,14 +14,9 @@ import 'controller/theme_controller.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Controller'ları başlat ve verilerin yüklenmesini bekle
-  final themeController = Get.put(ThemeController());
+  // Controller'ları başlat
+  Get.put(ThemeController());
   Get.put(AngleController());
-
-  // Ayarlar yüklenene kadar küçük bir gecikme veya await mekanizması
-  // ThemeController içindeki _loadSettings asenkron olduğu için ilk renderda
-  // varsayılan değerleri görebiliriz. Bunu önlemek için SharedPreferences'ı burada da okuyabiliriz
-  // veya controller içinde bir 'isReady' flag'i kullanabiliriz.
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -164,7 +159,9 @@ class _LevelPageState extends State<LevelPage> {
           "Başarılı",
           "Açı kaydedildi.",
           snackPosition: SnackPosition.TOP,
-          backgroundColor: themeController.primaryColor.value.withOpacity(0.7),
+          backgroundColor: themeController.primaryColor.value.withValues(
+            alpha: 0.7,
+          ),
           colorText: Colors.white,
         );
       },
@@ -206,24 +203,24 @@ class _LevelPageState extends State<LevelPage> {
             Obx(
               () => Column(
                 children: [
-                  RadioListTile<int>(
-                    title: const Text("Sistem"),
+                  Radio<int>(
                     value: 0,
                     groupValue: themeController.themeModeIndex.value,
                     onChanged: (v) => themeController.changeThemeMode(v!),
                   ),
-                  RadioListTile<int>(
-                    title: const Text("Aydınlık"),
+                  const Text("Sistem"),
+                  Radio<int>(
                     value: 1,
                     groupValue: themeController.themeModeIndex.value,
                     onChanged: (v) => themeController.changeThemeMode(v!),
                   ),
-                  RadioListTile<int>(
-                    title: const Text("Karanlık"),
+                  const Text("Aydınlık"),
+                  Radio<int>(
                     value: 2,
                     groupValue: themeController.themeModeIndex.value,
                     onChanged: (v) => themeController.changeThemeMode(v!),
                   ),
+                  const Text("Karanlık"),
                 ],
               ),
             ),
@@ -450,7 +447,7 @@ class _LevelPageState extends State<LevelPage> {
           borderRadius: BorderRadius.circular(height / 2),
           border: Border.all(
             color: isCentered
-                ? themeController.primaryColor.value.withOpacity(0.5)
+                ? themeController.primaryColor.value.withValues(alpha: 0.5)
                 : (themeController.isDarkMode
                       ? Colors.white10
                       : Colors.black12),
@@ -486,8 +483,10 @@ class _LevelPageState extends State<LevelPage> {
                     colors: isCentered
                         ? [Colors.white, themeController.primaryColor.value]
                         : [
-                            Colors.white.withOpacity(0.9),
-                            themeController.primaryColor.value.withOpacity(0.7),
+                            Colors.white.withValues(alpha: 0.9),
+                            themeController.primaryColor.value.withValues(
+                              alpha: 0.7,
+                            ),
                           ],
                     center: const Alignment(-0.3, -0.3),
                   ),
@@ -530,7 +529,7 @@ class _LevelPageState extends State<LevelPage> {
                 ? [Colors.white, themeController.primaryColor.value]
                 : [
                     Colors.white,
-                    themeController.primaryColor.value.withOpacity(0.7),
+                    themeController.primaryColor.value.withValues(alpha: 0.7),
                   ],
             center: const Alignment(-0.3, -0.3),
           ),
@@ -557,7 +556,7 @@ class CrossLinesPainter extends CustomPainter {
     final themeController = Get.find<ThemeController>();
     final paint = Paint()
       ..color = isCentered
-          ? primaryColor.withOpacity(0.3)
+          ? primaryColor.withValues(alpha: 0.3)
           : (themeController.isDarkMode ? Colors.white10 : Colors.black12)
       ..strokeWidth = 1.5;
     canvas.drawLine(
